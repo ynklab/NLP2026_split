@@ -32,17 +32,27 @@ F x = λ f → f x
 
 -- function application (continuized)
 >ᶜ : {α β r o o' : Set} → ICont r o (α → β) → ICont o o' α → ICont r o' β
->ᶜ F X = F >>= (λ f → X >>= (λ x → pure (f x)))
+>ᶜ F X = do
+    f ← F
+    x ← X
+    pure (f x)
 
 <ᶜ : {α β r o o' : Set} → ICont r o α → ICont o o' (α → β) → ICont r o' β
-<ᶜ X F = X >>= (λ x → F >>= (λ f → pure (f x)))
+<ᶜ X F = do
+    x ← X
+    f ← F
+    pure (f x)
 
 -- type-raising (continuized)
 >Tᶜ : {α β r o : Set} → ICont r o α → ICont r o ((α → β) → β)
->Tᶜ X = X >>= (λ x → pure (λ f → f x))
+>Tᶜ X = do
+    x ← X
+    pure (λ f → f x)
 
 <Tᶜ : {α β r o : Set} → ICont r o α → ICont r o ((α → β) → β)
-<Tᶜ X = X >>= (λ x → pure (λ f → f x))
+<Tᶜ X = do
+    x ← X
+    pure (λ f → f x)
 
 -- lift
 ⇑ : {α r : Set} → α → ICont r r α
@@ -54,9 +64,11 @@ F x = λ f → f x
 
 -- bind
 ▷ : {α r o : Set} → ICont r o α → ICont r (α → o) α
-▷ X = X >>= (λ x → bind x)
+▷ X = do
+    x ← X
+    bind x
 
--- split (applicative's application)
+-- split (definable with >ᶜ/<ᶜ)
 ⊛> : {α β r o o' : Set} → ICont r o (α → β) → ICont o o' α → ICont r o' β
 ⊛> F = λ X → >ᶜ F X
 

@@ -19,11 +19,17 @@ pro = λ k x → k x
 
 -- pro and bind cancel each other
 lem-pro-bind : {α r o : Set} {a : e} {f : e → e → ICont r o α}
-    → bind a >>= (λ x → pro >>= (λ y → f x y)) ≡ f a a
+    → (do
+        x ← bind a
+        y ← pro
+        f x y)
+    ≡ f a a
 lem-pro-bind = refl
 
 which : {r o : Set} → ICont r o e → ICont r o e
-which X = X >>= (λ x → wh2 x)
+which X = do
+    x ← X
+    wh2 x
 
 did : Bool → Bool
 did x = x
