@@ -2,6 +2,10 @@ open import continuation
 open import Data.Bool.Base
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
+private
+    variable
+        α r o : Set
+
 -- lexical items
 postulate
     e : Set -- entity type
@@ -10,15 +14,15 @@ postulate
     mom : e → e
     call : e → e → Bool
     rels : e → e
-    ev : {r : Set} → ICont r r e
-    wh : {r : Set} → ICont r r e -- tentatively defined as a generalized quantifier
-    wh2 : {r : Set} → e → ICont r r e
+    ev : ICont r r e
+    wh : ICont r r e -- tentatively defined as a generalized quantifier
+    wh2 : e → ICont r r e
 
-pro : {r : Set} → ICont (e → r) r e
+pro : ICont (e → r) r e
 pro = λ k x → k x
 
 -- pro and bind cancel each other
-lem-pro-bind : {α r o : Set} {a : e} {f : e → e → ICont r o α}
+lem-pro-bind : {a : e} {f : e → e → ICont r o α}
     → (do
         x ← bind a
         y ← pro
@@ -26,7 +30,7 @@ lem-pro-bind : {α r o : Set} {a : e} {f : e → e → ICont r o α}
     ≡ f a a
 lem-pro-bind = refl
 
-which : {r o : Set} → ICont r o e → ICont r o e
+which : ICont r o e → ICont r o e
 which X = do
     x ← X
     wh2 x
