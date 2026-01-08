@@ -1,9 +1,10 @@
+open import continuation
 open import lex
 open import rules
 open import Data.Bool.Base
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
--- Sandy called Kim's mother
+-- Basic: Sandy called Kim's mother.
 ex₁ : Bool
 ex₁ =
     (<
@@ -20,7 +21,7 @@ ex₁ =
 ex₁-check : ex₁ ≡ call (mom k) s
 ex₁-check = refl
 
--- Sandy called everyone
+-- Quantification: Sandy called everyone.
 ex₂ : Bool
 ex₂ =
     (⇓
@@ -36,7 +37,7 @@ ex₂ =
 ex₂-check : ex₂ ≡ ev (λ x → call x s)
 ex₂-check = refl
 
--- Everyone₁ called their₁ mother.
+-- Quantificational binding: Everyoneᵢ called theirᵢ mother.
 ex₃ : Bool
 ex₃ =
     (⇓
@@ -55,9 +56,28 @@ ex₃ =
 ex₃-check : ex₃ ≡ ev (λ x → call (mom x) x)
 ex₃-check = refl
 
--- Who called everyone?
+-- Binding with a proper name: Sandyᵢ called herᵢ mother.
 ex₄ : Bool
 ex₄ =
+    (⇓
+        (<ᶜ
+            (▷ (⇑ s))
+            (>ᶜ
+                (⇑ call)
+                (<ᶜ
+                    pro
+                    (⇑ mom)
+                )
+            )
+        )
+    )
+
+ex₄-check : ex₄ ≡ call (mom s) s
+ex₄-check = refl
+
+-- Wh-question + quantification: Who called everyone?
+ex₅ : Bool
+ex₅ =
     (⇓
         (<ᶜ
             wh
@@ -68,12 +88,12 @@ ex₄ =
         )
     )
 
-ex₄-check : ex₄ ≡ wh (λ x → ev (λ y → call y x))
-ex₄-check = refl
+ex₅-check : ex₅ ≡ wh (λ x → ev (λ y → call y x))
+ex₅-check = refl
 
--- Who called their mother?
-ex₅ : Bool
-ex₅ =
+-- Wh-question with binding: Whoᵢ called theirᵢ mother?
+ex₆ : Bool
+ex₆ =
     (⇓
         (<ᶜ
             (▷ wh)
@@ -87,12 +107,12 @@ ex₅ =
         )
     )
 
-ex₅-check : ex₅ ≡ wh (λ x → call (mom x) x)
-ex₅-check = refl
+ex₆-check : ex₆ ≡ wh (λ x → call (mom x) x)
+ex₆-check = refl
 
--- Kim's mother, Sandy called. (topicalization)
-ex₆ : Bool
-ex₆ =
+-- Topicalization (to check >B): Kim's mother, Sandy called.
+ex₇ : Bool
+ex₇ =
     (>
         (F
             (<
@@ -109,12 +129,12 @@ ex₆ =
         )
     )
 
-ex₆-check : ex₆ ≡ call (mom k) s
-ex₆-check = refl
+ex₇-check : ex₇ ≡ call (mom k) s
+ex₇-check = refl
 
--- Whom did everyone call?
-ex₇ : Bool
-ex₇ =
+-- Object wh-question (reconstructed below the quantifier): Whom did everyone call?
+ex₈ : Bool
+ex₈ =
     (⇓
         (>
             (F wh)
@@ -128,12 +148,12 @@ ex₇ =
         )
     )
 
-ex₇-check : ex₇ ≡ ev (λ x → wh (λ y → call y x))
-ex₇-check = refl
+ex₈-check : ex₈ ≡ ev (λ x → wh (λ y → call y x))
+ex₈-check = refl
 
--- Which of their₁ relatives did everyone₁ call?
-ex₈ : Bool
-ex₈ =
+-- Reconstruction: Which of theirᵢ relatives did everyoneᵢ call?
+ex₉ : Bool
+ex₉ =
     (⇓
         (>
             (F
@@ -158,5 +178,34 @@ ex₈ =
         )
     )
 
-ex₈-check : ex₈ ≡ ev (λ x → wh2 (rels x) (λ y → call y x))
-ex₈-check = refl
+ex₉-check : ex₉ ≡ ev (λ x → wh2 (rels x) (λ y → call y x))
+ex₉-check = refl
+
+-- Weak crossover: *Whomᵢ did theirᵢ mother call?
+-- Derivation before the final step (i.e., application of ⇓)
+ex₁₀-1 : ICont (e → Bool) (e → Bool) Bool
+ex₁₀-1 =
+    (>
+        (F (▷ wh))
+        (>B
+            (⊛> (⇑ did))
+            (>B
+                (⊛>
+                    (>Tᶜ
+                        (<ᶜ
+                            pro
+                            (⇑ mom)
+                        )
+                    )
+                )
+                (⊛> (⇑ call))
+            )
+        )
+    )
+
+ex₁₀-1-check : ex₁₀-1 ≡ λ k x → wh (λ y → k (call y (mom x)) y)
+ex₁₀-1-check = refl
+
+-- This cannot be lowered with ⇓
+-- ex₁₀-2 : Bool
+-- ex₁₀-2 = ⇓ ex₁₀-1 -- Type checking fails!

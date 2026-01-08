@@ -5,10 +5,6 @@ private
     variable
         α β γ r o o' : Set
 
--- entity type
-postulate
-    e : Set
-
 -- function application
 > : (α → β) → α → β
 > f x = f x
